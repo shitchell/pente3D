@@ -2,4 +2,4 @@
 
 A 3D ~~mindfuck~~ implementation of the classic game
 
-[Play online](https://ggcdevs.github.)
+[Play online](https://ggcdevs.github.io/pente3D)
