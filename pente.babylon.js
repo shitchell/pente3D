@@ -1,7 +1,18 @@
+var DEBUG = false;
+function debug(...message) {
+  if (DEBUG) {
+    let timestamp = new Date().toISOString().replace(/T/, ' ').replace(/\..+/, '');
+    let prefix = `[pente3D] ${timestamp} --`;
+    debug(prefix, ...message);
+  }
+}
+
 function createScene() {
   // This creates a basic Babylon Scene object (non-mesh)
   var scene = new BABYLON.Scene(engine);
   var camera = new BABYLON.ArcRotateCamera("Camera", 3 * Math.PI / 2, Math.PI / 8, 50, BABYLON.Vector3.Zero(), scene);
+  // var camera = new BABYLON.FlyCamera("Camera", 3 * Math.PI / 2, Math.PI / 8, 50, BABYLON.Vector3.Zero(), scene);
+
 
   //  BABYLON.FlyCamera
   // This creates and positions a free camera (non-mesh)
@@ -30,62 +41,71 @@ function createScene() {
   const size = 10;
   scene.onPointerObservable.add((pointerInfo) => {
 
-    // console.log("Pointer info :"+);
+    // debug("Pointer info :"+);
     var badState = 0;
     switch (pointerInfo.type) {
       case BABYLON.PointerEventTypes.POINTERDOWN:
-        console.log("POINTER DOWN");
+        debug("POINTER DOWN");
         break;
       case BABYLON.PointerEventTypes.POINTERUP:
-        console.log("POINTER UP");
+        debug("POINTER UP");
         break;
       case BABYLON.PointerEventTypes.POINTERMOVE:
-        console.log("POINTER MOVE");
+        debug("POINTER MOVE");
         break;
       case BABYLON.PointerEventTypes.POINTERWHEEL:
-        console.log("POINTER WHEEL");
+        debug("POINTER WHEEL");
         break;
       case BABYLON.PointerEventTypes.POINTERPICK:
-        console.log("POINTER PICK");
+        debug("POINTER PICK");
         break;
       case BABYLON.PointerEventTypes.POINTERTAP:
-        console.log("POINTER TAP");
+        debug("POINTER TAP");
+        if (pointerInfo.event.button == 2) {
+          camera.focusOn([pointerInfo.pickInfo.pickedMesh], true);
+        }
         break;
       case BABYLON.PointerEventTypes.POINTERDOUBLETAP:
-        console.log("POINTER DOUBLE-TAP: " + badState);
+        debug("POINTER DOUBLE-TAP: " + badState);
 
-        var oldMaterial = pointerInfo.pickInfo.pickedMesh.material;
-
-        badState = Math.round(Math.random() * 3.3);
+        var oldMeterial = pointerInfo.pickInfo.pickedMesh.material;
+        var arrayOfProbs = pointerInfo.pickInfo.pickedMesh.name.split(":");//LOL WTF
+        var numberState = Number(arrayOfProbs[4]);
         var material = new BABYLON.StandardMaterial("scene");
-        if (badState % 3 == 0 && badState != 0) {
+        if (numberState == 3) {
           material.alpha = 0.9;
           material.diffuseColor = new BABYLON.Color3(0, 1, 0.5);
           sphere.material = material;
           pointerInfo.pickInfo.pickedMesh.material = material;
-        } else if (badState % 2 == 0 && badState != 0) {
+        } else if (numberState == 2) {
           material.alpha = 0.9;
           material.diffuseColor = new BABYLON.Color3(1, 0, 0);
           sphere.material = material;
           pointerInfo.pickInfo.pickedMesh.material = material;
+        } else if (numberState == 1) {
+          material.alpha = 0.6;
+          material.diffuseColor = new BABYLON.Color3(1, 1, 0);
+          sphere.material = material;
+          pointerInfo.pickInfo.pickedMesh.material = material;
         } else {
-          material.alpha = 0.3;
-          material.diffuseColor = new BABYLON.Color3(0.2, 0.2, 0.2);
+          material.alpha = 0.35;
+          material.diffuseColor = new BABYLON.Color3(0.7, 0.7, 0.7);
           sphere.material = material;
           pointerInfo.pickInfo.pickedMesh.material = material;
         }
-        badState = badState + 1;
-        if (badState > 3) {
-          badState = 0;
+        numberState++;
+        if (numberState > 3) {
+          numberState = 0;//TODO add back in start color set up
         }
+        let nameString = arrayOfProbs[0] + ":" + arrayOfProbs[1] + ":" + arrayOfProbs[2] + ":" + arrayOfProbs[3] + ":" + numberState;
+        pointerInfo.pickInfo.pickedMesh.name = nameString;
         break;
     }
   });
-
   for (var k = 0; k < size; k++) {
     for (var j = 0; j < size; j++) {
       for (var i = 0; i < size; i++) {
-        var sphere = BABYLON.MeshBuilder.CreateSphere("sphere", { diameter: 2, segments: 32 }, scene);
+        var sphere = BABYLON.MeshBuilder.CreateSphere("sphere:" + i + ":" + j + ":" + ":" + k + ":" + 0, { diameter: 2, segments: 32 }, scene);
         sphere.position.y = 1 + (j * spaceNumber);
         sphere.position.x = i * spaceNumber;
         sphere.position.z = (k * spaceNumber);
@@ -97,11 +117,12 @@ function createScene() {
           sphere.material = material;
         } else {
           var material = new BABYLON.StandardMaterial("scene");
-          material.alpha = 0.3;
+          material.alpha = 0.35;
           // material.diffuseColor = new BABYLON.Color3(1.0, 0.2, 0.7);
           sphere.material = material;
         }
         sphereArray[i] = sphere;
+
       }
     }
   }
@@ -110,7 +131,7 @@ function createScene() {
   // Our built-in 'ground' shape. Params: name, options, scene
   var ground = BABYLON.MeshBuilder.CreateGround("ground", {
     width: 2,
-    height: 2
+    height: 6
   }, scene);
 
   return scene;
