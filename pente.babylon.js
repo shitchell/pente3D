@@ -131,7 +131,7 @@ function createScene() {
   // Our built-in 'ground' shape. Params: name, options, scene
   var ground = BABYLON.MeshBuilder.CreateGround("ground", {
     width: 2,
-    height: 6
+    height: 2
   }, scene);
 
   return scene;
