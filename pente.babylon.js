@@ -15,7 +15,6 @@
 var defaultOptions = {
   size: 10, // Number of spheres in each dimension
   winLength: 5, // Number of spheres in a row needed to win
-  rowSize: 10, // Number of spheres in a row
   sphereDiameter: 2, // Diameter of each sphere
   sphereSpacing: 8, // Spacing between spheres
   sphereColorPlayer1: new BABYLON.Color3(0, 1, 0.5), // Color of player 1's spheres
@@ -80,7 +79,7 @@ function createScene(options) {
   var sphereArray = [];
   // Move the sphere upward 1/2 its 
   const spaceNumber = options.sphereSpacing;
-  const size = options.sphereDiameter;
+  const size = options.size;
   scene.onPointerObservable.add((pointerInfo) => {
 
     // debug("Pointer info :"+);
@@ -104,7 +103,13 @@ function createScene(options) {
       case BABYLON.PointerEventTypes.POINTERTAP:
         debug("POINTER TAP");
         if (pointerInfo.event.button == 2) {
+          // On right click, focus on the picked mesh
           camera.focusOn([pointerInfo.pickInfo.pickedMesh], true);
+          if (DEBUG) {
+            debug("Mesh foo flag: " + pointerInfo.pickInfo.pickedMesh.foo);
+            pointerInfo.pickInfo.pickedMesh.foo = Math.floor(Math.random() * 10)
+            debug("Mesh foo flag set to: " + pointerInfo.pickInfo.pickedMesh.foo);
+          }
         }
         break;
       case BABYLON.PointerEventTypes.POINTERDOUBLETAP:
